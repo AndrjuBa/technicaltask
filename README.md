@@ -5,7 +5,8 @@
 3. Run Install_ELKStack.yml, it will use already 5 created AWS Debian servers and will configure 3 nodes for elastic search, 1 node for Kibana and 1 node for Logstash one by one, installing all needed software and then pointing to each service > ansible-playbook /etc/ansible/install_ELKstack.yml -i /etc/ansible/inventories/inventory.ini
 4. Completed. You have 5 running nodes with all needed services and software.
 
-## Note: Installing elastic search nodes and software is optimized. It always checks for cluster group: elastic and if software is installed for this host, then it will skip installation. But if software is not yet installed, then playbook will download everything.
+### Notes: 
+Installing elastic search nodes and software is optimized. It always checks for cluster group: elastic and if software is installed for this host, then it will skip installation. But if software is not yet installed, then playbook will download everything.
 All hosts information will be stored in /etc/ansible/inventories/inventory.ini file
 
 
