@@ -1,0 +1,57 @@
+---
+- name: Install Elasticsearch and dependencies
+  hosts: elastic_*
+  become: true
+
+  vars:
+    es_version: "7.15.0"
+    java_package: "openjdk-11-jre-headless"
+    es_download_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ es_version }}-amd64.deb"
+
+  tasks:
+  - name: Install required packages
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        - gnupg2
+        - software-properties-common
+
+  - name: Add Elasticsearch GPG key
+    apt_key:
+      url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+
+  - name: Add Elasticsearch repository
+    apt_repository:
+      repo: deb https://artifacts.elastic.co/packages/{{ es_version }}/apt stable main
+      state: present
+
+  - name: Install Elasticsearch
+    apt:
+      name: "{{ es_download_url }}"
+      state: present
+
+  - name: Enable and start Elasticsearch service
+    systemd:
+      name: elasticsearch
+      enabled: yes
+      state: started
+
+  - name: Install Java
+    apt:
+      name: "{{ java_package }}"
+      state: present
+
+  - name: Configure Elasticsearch
+    lineinfile:
+      path: /etc/elasticsearch/elasticsearch.yml
+      regexp: "^#?cluster.name:"
+      line: "cluster.name: elastic"
+      state: present
+      backup: yes
+
+    - name: Restart Elasticsearch service
+      systemd:
+        name: elasticsearch
+        state: restarted

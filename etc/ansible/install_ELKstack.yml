@@ -1,0 +1,30 @@
+---
+- name: Create Elasticsearch, Logstash, and Kibana nodes
+  hosts: all
+  become: true
+
+  vars:
+    elasticsearch_nodes:
+      - elastic_1
+      - elastic_2
+      - elastic_3
+    kibana_version: "7.15.0"
+    elasticsearch_url: "http://localhost:9200"
+
+  tasks:
+  - name: Install Java
+    apt:
+      name: openjdk-11-jre-headless
+      state: present
+
+  - name: Install Elasticsearch nodes
+    include_tasks: inst_elastic_node.yaml
+    loop: "{{ elasticsearch_nodes }}"
+    loop_control:
+      loop_var: elasticsearch_node
+
+  - name: Install Logstash node
+    include_tasks: inst_logstash_node.yaml
+
+  - name: Install Kibana node
+    include_tasks: inst_kibana_node.yaml

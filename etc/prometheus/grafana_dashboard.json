@@ -1,0 +1,110 @@
+{
+    "dashboard": {
+        "id": null,
+        "title": "Server Metrics",
+        "panels": [
+            {
+                "title": "CPU Usage",
+                "type": "graph",
+                "targets": [
+                    {
+                        "expr": "100 - avg by (instance) (irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100",
+                        "legendFormat": "{{instance}}"
+                    }
+                ],
+                "yaxes": [
+                    {
+                        "format": "percent"
+                    },
+                    {
+                        "format": "short"
+                    }
+                ]
+            },
+            {
+                "title": "Disk Usage",
+                "type": "graph",
+                "targets": [
+                    {
+                        "expr": "100 - ((node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'}) * 100)",
+                        "legendFormat": "{{instance}}"
+                    }
+                ],
+                "yaxes": [
+                    {
+                        "format": "percent"
+                    },
+                    {
+                        "format": "short"
+                    }
+                ]
+            }
+        ],
+        "timezone": "browser",
+        "editable": true,
+        "schemaVersion": 16,
+        "version": 0,
+        "links": [],
+        "gnetId": null,
+        "hideControls": false,
+        "sharedCrosshair": false,
+        "rows": [
+            {
+                "panels": [
+                    {
+                        "title": "CPU Usage",
+                        "type": "graph",
+                        "span": 6,
+                        "fill": 1,
+                        "linewidth": 2,
+                        "targets": [
+                            {
+                                "expr": "100 - avg by (instance) (irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100",
+                                "legendFormat": "{{instance}}"
+                            }
+                        ],
+                        "yaxes": [
+                            {
+                                "format": "percent"
+                            },
+                            {
+                                "format": "short"
+                            }
+                        ],
+                        "id": 2
+                    },
+                    {
+                        "title": "Disk Usage",
+                        "type": "graph",
+                        "span": 6,
+                        "fill": 1,
+                        "linewidth": 2,
+                        "targets": [
+                            {
+                                "expr": "100 - ((node_filesystem_avail_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'}) * 100)",
+                                "legendFormat": "{{instance}}"
+                            }
+                        ],
+                        "yaxes": [
+                            {
+                                "format": "percent"
+                            },
+                            {
+                                "format": "short"
+                            }
+                        ],
+                        "id": 3
+                    }
+                ]
+            }
+        ],
+        "time": {
+            "from": "now-6h",
+            "to": "now"
+        },
+        "templating": {
+            "list": []
+        }
+    },
+    "overwrite": false
+}

@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+      - targets: ['{{ ansible_host }}:9100' for ansible_host in groups['all']]
+
+  - job_name: 'node_disk_stats'
+    static_configs:
+      - targets: ['localhost:9100']
+      - targets: ['{{ ansible_host }}:9100' for ansible_host in groups['all']]
+    metrics_path: /metrics/diskstats
+    params:
+      mountpoint: ['/']
+
+  - job_name: 'node_cpu_stats'
+    static_configs:
+      - targets: ['localhost:9100']
+      - targets: ['{{ ansible_host }}:9100' for ansible_host in groups['all']]
+    metrics_path: /metrics/cpu
+    params:
+      mode: ['idle', 'iowait']

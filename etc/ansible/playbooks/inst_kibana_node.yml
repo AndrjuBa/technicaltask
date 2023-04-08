@@ -1,0 +1,53 @@
+---
+- name: Install Kibana and dependencies
+  hosts: kibana_1
+  become: true
+  vars:
+    kibana_version: 7.10.1
+
+  tasks:
+    - name: Install Node.js and npm
+      apt:
+        name: ['nodejs', 'npm']
+        state: present
+
+    - name: Download and extract Kibana
+      get_url:
+        url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kibana_version }}-linux-x86_64.tar.gz"
+        dest: /tmp/kibana.tar.gz
+        mode: '0644'
+      register: download_result
+
+    - name: Extract Kibana archive
+      become: true
+      unarchive:
+        src: /tmp/kibana.tar.gz
+        dest: /usr/share/
+        copy: no
+        owner: root
+        group: root
+
+    - name: Create Kibana symlink
+      become: true
+      file:
+        src: "/usr/share/kibana-{{ kibana_version }}/"
+        dest: /usr/share/kibana
+        state: link
+
+    - name: Set Kibana configuration
+      lineinfile:
+        path: /usr/share/kibana/config/kibana.yml
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '#server.host: "localhost"', line: 'server.host: "0.0.0.0"' }
+        - { regexp: '#server.port: 5601', line: 'server.port: 80' }
+        - { regexp: '#elastic_1: \["http://localhost:9200"\]', line: 'elastic_1: ["http://elasticsearch_host:9200"]' }
+        - { regexp: '#elastic_2: \["http://localhost:9200"\]', line: 'elastic_2: ["http://elasticsearch_host:9200"]' }
+        - { regexp: '#elastic_3: \["http://localhost:9200"\]', line: 'elastic_3: ["http://elasticsearch_host:9200"]' }
+        
+    - name: Start Kibana service
+      systemd:
+        name: kibana
+        state: started
+        enabled: yes

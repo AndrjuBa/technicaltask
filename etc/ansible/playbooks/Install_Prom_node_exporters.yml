@@ -1,0 +1,43 @@
+---
+- name: Install Prometheus Node Exporter and configure metrics reporting
+  hosts: all
+  become: true
+  vars:
+    grafana_server: "URL is to be added later after installing Grafana"
+    grafana_port: "3000"
+  tasks:
+    - name: Install Prometheus Node Exporter
+      apt:
+        name: prometheus-node-exporter
+        state: present
+
+    - name: Configure Prometheus Node Exporter
+      lineinfile:
+        path: /etc/default/prometheus-node-exporter
+        line: 'ARGS="-collector.diskstats.ignored-devices=\"^(ram|loop|fd|(h|s|v|xv)d[a-z])\d*$\" -collector.textfile.directory=/var/lib/node_exporter/textfile_collector"'
+      notify:
+        - restart prometheus-node-exporter
+
+    - name: Start Prometheus Node Exporter
+      service:
+        name: prometheus-node-exporter
+        state: started
+        enabled: yes
+
+    - name: Configure metrics reporting
+      lineinfile:
+        path: /etc/prometheus/prometheus.yml
+        line: '- targets: ["{{ inventory_hostname }}:{{ grafana_port }}"]'
+      notify:
+        - restart prometheus
+
+  handlers:
+    - name: restart prometheus-node-exporter
+      service:
+        name: prometheus-node-exporter
+        state: restarted
+
+    - name: restart prometheus
+      service:
+        name: prometheus
+        state: restarted

@@ -1,0 +1,57 @@
+---
+- name: Create EC2 instances
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars:
+    region: eu-north-1
+    group: AWS_security_group
+    vpc_subnet_id: subnet-xxxxxxxx
+    inventory_file: /etc/ansible/inventories/inventory.ini
+    instances:
+      - name: elastic_1
+        key_name: AWS_key
+        instance_type: t2.micro
+        image: ami-0a91cd140a1fc148a
+      - name: elastic_2
+        key_name: AWS_key
+        instance_type: t2.micro
+        image: ami-0a91cd140a1fc148a
+      - name: elastic_3
+        key_name: AWS_key
+        instance_type: t2.micro
+        image: ami-0a91cd140a1fc148a
+      - name: kibana_1
+        key_name: AWS_key
+        instance_type: t2.micro
+        image: ami-0a91cd140a1fc148a
+      - name: logstash_1
+        key_name: AWS_key
+        instance_type: t2.micro
+        image: ami-0a91cd140a1fc148a
+
+  tasks:
+    - name: Launch instances
+      ec2:
+        key_name: "{{ item.key_name }}"
+        instance_type: "{{ item.instance_type }}"
+        image: "{{ item.image }}"
+        wait: true
+        region: "{{ region }}"
+        group: "{{ group }}"
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        count: 1
+        instance_tags:
+          Name: "{{ item.name }}"
+      register: ec2_instance
+      loop: "{{ instances }}"
+
+    - name: Add new instances to inventory file
+      lineinfile:
+        dest: "{{ inventory_file }}"
+        line: "{{ item.instances[0].public_dns_name }} ansible_user=ubuntu ansible_ssh_private_key_file=/etc/ansible/keys/ssh_key.pem"
+        create: yes
+      loop: "{{ ec2_instance.results }}"
+      when: item.changed is defined
